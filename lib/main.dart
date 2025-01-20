@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:chat/post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -69,6 +71,17 @@ class _SignInPageState extends State<SignInPage> {
             // ログインが成功すると FirebaseAuth.instance.currentUserにログイン中のユーザーの情報が入る
             // ignore: avoid_print
             print(FirebaseAuth.instance.currentUser?.displayName);
+
+            // ログインに成功したらChatPageに遷移
+            // 前のページに戻らせないようにするにはpushAndRemoveUntilを使う
+            if (mounted) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) {
+                  return const ChatPage();
+                }),
+                (route) => false,
+              );
+            }
           },
         ),
       ),
@@ -84,3 +97,24 @@ final postsReference = FirebaseFirestore.instance.collection('posts').withConver
     return value.toMap();
   }),
 );
+
+class ChatPage extends StatefulWidget {
+  const ChatPage({super.key});
+
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('チャット'),
+      ),
+      body: Center(
+        child: TextFormField(),
+      ),
+    );
+  }
+}
