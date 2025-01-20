@@ -113,7 +113,33 @@ class _ChatPageState extends State<ChatPage> {
         title: const Text('チャット'),
       ),
       body: Center(
-        child: TextFormField(),
+        child: TextFormField(
+          onFieldSubmitted: (text) {
+            // ログイン中のユーザーデータを格納
+            final user = FirebaseAuth.instance.currentUser!;
+
+            final posterId = user.uid; // ログイン中のユーザーのID
+            final posterName = user.displayName!; // Googleアカウントの名前
+            final posterImageUrl = user.photoURL!; // Googleアカウントのアイコンデータ
+
+            // 先ほど作ったpostsReferenceからランダムなIDのドキュメントリファレンスを作成
+            // docの引数を空にするとランダムなIDが採番される
+            final newDocumentReference = postsReference.doc();
+
+            final newPost = Post(
+              text: text,
+              createdAt: Timestamp.now(),
+              posterName: posterName,
+              posterImageUrl: posterImageUrl,
+              posterId: posterId,
+              reference: newDocumentReference,
+            );
+
+            // 先ほど作ったnewDocumentReferenceのset関数を実行するとそのドキュメントにデータが保存される
+            // 通常はMapしか受け付けないが、withConverterを使用したことにより Postインスタンスを受け取れるようになる
+            newDocumentReference.set(newPost);
+          },
+        ),
       ),
     );
   }
