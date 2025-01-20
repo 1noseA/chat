@@ -1,3 +1,5 @@
+import 'package:chat/post.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -73,3 +75,12 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 }
+
+final postsReference = FirebaseFirestore.instance.collection('posts').withConverter<Post>( // <>に変換したい型名を入れる
+  fromFirestore: ((snapshot, _) { // 第二引数は使わない場合は「_」と書くことでわかりやすく
+    return Post.fromFirestore(snapshot);
+  }),
+  toFirestore: ((value, _) {
+    return value.toMap();
+  }),
+);
