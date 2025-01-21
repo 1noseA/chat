@@ -112,34 +112,58 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         title: const Text('チャット'),
       ),
-      body: Center(
-        child: TextFormField(
-          onFieldSubmitted: (text) {
-            // ログイン中のユーザーデータを格納
-            final user = FirebaseAuth.instance.currentUser!;
-
-            final posterId = user.uid; // ログイン中のユーザーのID
-            final posterName = user.displayName!; // Googleアカウントの名前
-            final posterImageUrl = user.photoURL!; // Googleアカウントのアイコンデータ
-
-            // 先ほど作ったpostsReferenceからランダムなIDのドキュメントリファレンスを作成
-            // docの引数を空にするとランダムなIDが採番される
-            final newDocumentReference = postsReference.doc();
-
-            final newPost = Post(
-              text: text,
-              createdAt: Timestamp.now(),
-              posterName: posterName,
-              posterImageUrl: posterImageUrl,
-              posterId: posterId,
-              reference: newDocumentReference,
-            );
-
-            // 先ほど作ったnewDocumentReferenceのset関数を実行するとそのドキュメントにデータが保存される
-            // 通常はMapしか受け付けないが、withConverterを使用したことにより Postインスタンスを受け取れるようになる
-            newDocumentReference.set(newPost);
-          },
-        ),
+      body: Column(
+        children: [
+          Expanded (
+            child: StreamBuilder<QuerySnapshot<Post>>(
+              // streamプロパティにsnapshots()を与えると、コレクションの中のドキュメントをリアルタイムで監視できる
+              stream: postsReference.snapshots(),
+              // snapshotにstream で流れてきたデータが入っている
+              builder: (context, snapshot) {
+                // docsにはCollectionに保存されたすべてのドキュメントが入る
+                // 取得までには時間がかかるのではじめはnullが入っている
+                // nullの場合は空配列が代入されるようにしている
+                final docs = snapshot.data?.docs ?? [];
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    // withConverterを使ったことにより得られる恩恵
+                    // 何もしなければこのデータ型はMapになる
+                    final post = docs[index].data();
+                    return Text(post.text);
+                  },
+                );
+              },
+            ),
+          ),
+          TextFormField(
+            onFieldSubmitted: (text) {
+              // ログイン中のユーザーデータを格納
+              final user = FirebaseAuth.instance.currentUser!;
+        
+              final posterId = user.uid; // ログイン中のユーザーのID
+              final posterName = user.displayName!; // Googleアカウントの名前
+              final posterImageUrl = user.photoURL!; // Googleアカウントのアイコンデータ
+        
+              // 先ほど作ったpostsReferenceからランダムなIDのドキュメントリファレンスを作成
+              // docの引数を空にするとランダムなIDが採番される
+              final newDocumentReference = postsReference.doc();
+        
+              final newPost = Post(
+                text: text,
+                createdAt: Timestamp.now(),
+                posterName: posterName,
+                posterImageUrl: posterImageUrl,
+                posterId: posterId,
+                reference: newDocumentReference,
+              );
+        
+              // 先ほど作ったnewDocumentReferenceのset関数を実行するとそのドキュメントにデータが保存される
+              // 通常はMapしか受け付けないが、withConverterを使用したことにより Postインスタンスを受け取れるようになる
+              newDocumentReference.set(newPost);
+            },
+          ),
+        ],
       ),
     );
   }
