@@ -117,7 +117,7 @@ class _ChatPageState extends State<ChatPage> {
           Expanded (
             child: StreamBuilder<QuerySnapshot<Post>>(
               // streamプロパティにsnapshots()を与えると、コレクションの中のドキュメントをリアルタイムで監視できる
-              stream: postsReference.snapshots(),
+              stream: postsReference.orderBy('createdAt').snapshots(),
               // snapshotにstream で流れてきたデータが入っている
               builder: (context, snapshot) {
                 // docsにはCollectionに保存されたすべてのドキュメントが入る
