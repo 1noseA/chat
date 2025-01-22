@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'firebase_options.dart';
+import 'my_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // runApp前に何かを実行したいとき
@@ -111,6 +112,26 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('チャット'),
+        // actionsプロパティにWidgetを与えると右端に表示される
+        actions: [
+          // tap可能にするためにInkWellを使う
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return const MyPage();
+                  },
+                ),
+              );
+            },
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(
+                FirebaseAuth.instance.currentUser!.photoURL!,
+              ),
+            ),
+          )
+        ],
       ),
       body: Column(
         children: [
