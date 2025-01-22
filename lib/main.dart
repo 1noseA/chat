@@ -29,10 +29,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(),
-      home: const SignInPage(),
-    );
+    if (FirebaseAuth.instance.currentUser == null) {
+      // 未ログイン
+      return MaterialApp(
+        theme: ThemeData(),
+        home: const SignInPage(),
+      );
+    } else {
+      // ログイン中
+      return MaterialApp(
+        theme: ThemeData(),
+        home: const ChatPage(),
+      );
+    }
   }
 }
 
