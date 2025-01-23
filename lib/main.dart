@@ -160,7 +160,7 @@ class _ChatPageState extends State<ChatPage> {
                     // withConverterを使ったことにより得られる恩恵
                     // 何もしなければこのデータ型はMapになる
                     final post = docs[index].data();
-                    return Text(post.text);
+                    return PostWidget(post: post);
                   },
                 );
               },
@@ -192,6 +192,45 @@ class _ChatPageState extends State<ChatPage> {
               // 通常はMapしか受け付けないが、withConverterを使用したことにより Postインスタンスを受け取れるようになる
               newDocumentReference.set(newPost);
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class PostWidget extends StatelessWidget {
+  const PostWidget({
+    super.key,
+    required this.post,
+  });
+
+  final Post post;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundImage: NetworkImage(
+              post.posterImageUrl,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                post.posterName,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+              Text(post.text),
+            ],
           ),
         ],
       ),
