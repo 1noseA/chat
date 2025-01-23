@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
 
 import 'firebase_options.dart';
 import 'my_page.dart';
@@ -219,18 +220,30 @@ class PostWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                post.posterName,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      post.posterName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    Text(
+                      // toDate()でTimestamp からDateTimeに変換
+                      DateFormat('MM/dd HH:mm').format(post.createdAt.toDate()),
+                      style: const TextStyle(fontSize: 10),
+                    ),
+                  ],
                 ),
-              ),
-              Text(post.text),
-            ],
+                Text(post.text),
+              ],
+            ),
           ),
         ],
       ),
