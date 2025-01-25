@@ -253,6 +253,13 @@ class PostWidget extends StatelessWidget {
                   ),
                   child: Text(post.text),
                 ),
+                if (FirebaseAuth.instance.currentUser!.uid == post.posterId)
+                  IconButton(
+                    onPressed: () {
+                      post.reference.delete();
+                    },
+                    icon: const Icon(Icons.delete),
+                  ),
               ],
             ),
           ),
