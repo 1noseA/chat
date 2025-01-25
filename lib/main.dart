@@ -154,85 +154,92 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('チャット'),
-        // actionsプロパティにWidgetを与えると右端に表示される
-        actions: [
-          // tap可能にするためにInkWellを使う
-          InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) {
-                    return const MyPage();
-                  },
-                ),
-              );
-            },
-            child: CircleAvatar(
-              backgroundImage: NetworkImage(
-                FirebaseAuth.instance.currentUser!.photoURL!,
-              ),
-            ),
-          )
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded (
-            child: StreamBuilder<QuerySnapshot<Post>>(
-              // streamプロパティにsnapshots()を与えると、コレクションの中のドキュメントをリアルタイムで監視できる
-              stream: postsReference.orderBy('createdAt').snapshots(),
-              // snapshotにstream で流れてきたデータが入っている
-              builder: (context, snapshot) {
-                // docsにはCollectionに保存されたすべてのドキュメントが入る
-                // 取得までには時間がかかるのではじめはnullが入っている
-                // nullの場合は空配列が代入されるようにしている
-                final docs = snapshot.data?.docs ?? [];
-                return ListView.builder(
-                  itemCount: docs.length,
-                  itemBuilder: (context, index) {
-                    // withConverterを使ったことにより得られる恩恵
-                    // 何もしなければこのデータ型はMapになる
-                    final post = docs[index].data();
-                    return PostWidget(post: post);
-                  },
+    // Scaffold全体をGestureDetectorで囲むことでタップ可能
+    return GestureDetector(
+      onTap: () {
+        // キーボードを閉じる
+        primaryFocus?.unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('チャット'),
+          // actionsプロパティにWidgetを与えると右端に表示される
+          actions: [
+            // tap可能にするためにInkWellを使う
+            InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return const MyPage();
+                    },
+                  ),
                 );
               },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: TextFormField(
-              controller: controller,
-              decoration: InputDecoration(
-                // 未選択時の枠線
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.amber),
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(
+                  FirebaseAuth.instance.currentUser!.photoURL!,
                 ),
-                // 選択時の枠線
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(
-                    color: Colors.amber,
-                    width: 2,
-                  ),
-                ),
-                // 中を塗りつぶす色
-                fillColor: Colors.amber[50],
-                // 中を塗りつぶすかどうか
-                filled: true,
               ),
-              onFieldSubmitted: (text) {
-                sendPost(text);
-                // 入力中の文字列を削除
-                controller.clear();
-              },
+            )
+          ],
+        ),
+        body: Column(
+          children: [
+            Expanded (
+              child: StreamBuilder<QuerySnapshot<Post>>(
+                // streamプロパティにsnapshots()を与えると、コレクションの中のドキュメントをリアルタイムで監視できる
+                stream: postsReference.orderBy('createdAt').snapshots(),
+                // snapshotにstream で流れてきたデータが入っている
+                builder: (context, snapshot) {
+                  // docsにはCollectionに保存されたすべてのドキュメントが入る
+                  // 取得までには時間がかかるのではじめはnullが入っている
+                  // nullの場合は空配列が代入されるようにしている
+                  final docs = snapshot.data?.docs ?? [];
+                  return ListView.builder(
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      // withConverterを使ったことにより得られる恩恵
+                      // 何もしなければこのデータ型はMapになる
+                      final post = docs[index].data();
+                      return PostWidget(post: post);
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: TextFormField(
+                controller: controller,
+                decoration: InputDecoration(
+                  // 未選択時の枠線
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.amber),
+                  ),
+                  // 選択時の枠線
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                      color: Colors.amber,
+                      width: 2,
+                    ),
+                  ),
+                  // 中を塗りつぶす色
+                  fillColor: Colors.amber[50],
+                  // 中を塗りつぶすかどうか
+                  filled: true,
+                ),
+                onFieldSubmitted: (text) {
+                  sendPost(text);
+                  // 入力中の文字列を削除
+                  controller.clear();
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
