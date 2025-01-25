@@ -117,6 +117,31 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  Future<void> sendPost(String text) async {
+    // ログイン中のユーザーデータを格納
+    final user = FirebaseAuth.instance.currentUser!;
+
+    final posterId = user.uid; // ユーザーID
+    final posterName = user.displayName!; // Googleアカウントの名前
+    final posterImageUrl = user.photoURL!; // Googleアカウントのアイコンデータ
+
+    // postsReferenceからランダムなIDのドキュメントリファレンスを作成
+    // docの引数を空にするとランダムなIDが採番される
+    final newDocumentReference = postsReference.doc();
+
+    final newPost = Post(
+      text: text,
+      createdAt: Timestamp.now(),
+      posterName: posterName,
+      posterImageUrl: posterImageUrl,
+      posterId: posterId,
+      reference: newDocumentReference,
+    );
+
+    // ドキュメントにデータが保存される
+    newDocumentReference.set(newPost);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,32 +192,32 @@ class _ChatPageState extends State<ChatPage> {
               },
             ),
           ),
-          TextFormField(
-            onFieldSubmitted: (text) {
-              // ログイン中のユーザーデータを格納
-              final user = FirebaseAuth.instance.currentUser!;
-        
-              final posterId = user.uid; // ログイン中のユーザーのID
-              final posterName = user.displayName!; // Googleアカウントの名前
-              final posterImageUrl = user.photoURL!; // Googleアカウントのアイコンデータ
-        
-              // 先ほど作ったpostsReferenceからランダムなIDのドキュメントリファレンスを作成
-              // docの引数を空にするとランダムなIDが採番される
-              final newDocumentReference = postsReference.doc();
-        
-              final newPost = Post(
-                text: text,
-                createdAt: Timestamp.now(),
-                posterName: posterName,
-                posterImageUrl: posterImageUrl,
-                posterId: posterId,
-                reference: newDocumentReference,
-              );
-        
-              // 先ほど作ったnewDocumentReferenceのset関数を実行するとそのドキュメントにデータが保存される
-              // 通常はMapしか受け付けないが、withConverterを使用したことにより Postインスタンスを受け取れるようになる
-              newDocumentReference.set(newPost);
-            },
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: TextFormField(
+              decoration: InputDecoration(
+                // 未選択時の枠線
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.amber),
+                ),
+                // 選択時の枠線
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                    color: Colors.amber,
+                    width: 2,
+                  ),
+                ),
+                // 中を塗りつぶす色
+                fillColor: Colors.amber[50],
+                // 中を塗りつぶすかどうか
+                filled: true,
+              ),
+              onFieldSubmitted: (text) {
+                sendPost(text);
+              },
+            ),
           ),
         ],
       ),
@@ -241,25 +266,30 @@ class PostWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    // 角丸にするために追加
-                    // 4の数字を大きくするともっと丸くなる
-                    borderRadius: BorderRadius.circular(4),
-                    // [100]この数字を小さくすると色が薄くなる
-                    // 自分の投稿だけ色を変える
-                    color: FirebaseAuth.instance.currentUser!.uid == post.posterId ? Colors.amber[100] : Colors.blue[100],
-                  ),
-                  child: Text(post.text),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        // 角丸にするために追加
+                        // 4の数字を大きくするともっと丸くなる
+                        borderRadius: BorderRadius.circular(4),
+                        // [100]この数字を小さくすると色が薄くなる
+                        // 自分の投稿だけ色を変える
+                        color: FirebaseAuth.instance.currentUser!.uid == post.posterId ? Colors.amber[100] : Colors.blue[100],
+                      ),
+                      child: Text(post.text),
+                    ),
+                    if (FirebaseAuth.instance.currentUser!.uid == post.posterId)
+                      IconButton(
+                        onPressed: () {
+                          post.reference.delete();
+                        },
+                        icon: const Icon(Icons.delete),
+                      ),
+                  ],
                 ),
-                if (FirebaseAuth.instance.currentUser!.uid == post.posterId)
-                  IconButton(
-                    onPressed: () {
-                      post.reference.delete();
-                    },
-                    icon: const Icon(Icons.delete),
-                  ),
               ],
             ),
           ),
