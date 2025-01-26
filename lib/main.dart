@@ -306,10 +306,21 @@ class PostWidget extends StatelessWidget {
                         children: [
                           /// 編集ボタン
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    content: TextFormField(
+                                      initialValue: post.text,
+                                      autofocus: true,
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                             icon: const Icon(Icons.edit),
                           ),
-
                           /// 削除ボタン
                           IconButton(
                             onPressed: () {
